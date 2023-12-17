@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Map Route Generator</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      background-color: #20232a;
+      color: #ffffff;
+    }
+
+    header {
+      background-color: #343a40;
+      color: #ffffff;
+      padding: 10px;
+      text-align: center;
+    }
+
+    nav {
+      background-color: #343a40;
+      overflow: hidden;
+    }
+
+    nav a {
+      float: left;
+      display: block;
+      color: #ffffff;
+      text-align: center;
+      padding: 14px 16px;
+      text-decoration: none;
+    }
+
+    nav a:hover {
+      background-color: #454d55;
+      color: #ffffff;
+    }
+
+    .content {
+      padding: 20px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #routeInfo {
+      display: none;
+      margin-top: 20px;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      padding: 15px 30px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    #description {
+      font-size: 18px;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    #googleMapsLink {
+      display: inline-block;
+      background-color: #0056b3;
+      color: white;
+      padding: 15px 30px;
+      font-size: 16px;
+      text-decoration: none;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    #googleMapsLink:hover {
+      background-color: #004080;
+    }
+
+    #map {
+      height: 400px;
+      width: 80%;
+      margin: 20px 0;
+    }
+
+    @media only screen and (max-width: 600px) {
+      nav a {
+        float: none;
+        width: 100%;
+      }
+
+      button, #googleMapsLink {
+        width: 100%;
+      }
+
+      #map {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Map Route Generator</h1>
+  </header>
+
+  <nav>
+    <a href="#">Home</a>
+    <a href="#">About</a>
+  </nav>
+
+  <div class="content">
+    <div id="description">
+      <h2>SafeNav Initiative</h2>
+      <p>SafeNav helps women and solo travelers find safer routes to their destination from the source location.</p>
+    </div>
+
+    <div id="map"></div>
+
+    <div id="routeInfo">
+      <p id="routeLink"></p>
+      <a id="googleMapsLink" target="_blank" rel="noopener noreferrer">Open in Google Maps</a>
+    </div>
+
+    <button id="getRouteButton" onclick="getRoute()">Get Route</button>
+  </div>
+  <footer>
+    <p style="text-align: center; padding: 10px; background-color: #343a40; color: #ffffff; margin-top: 20px;">
+      Made with ❤️ for MLH All in Open Source Hackathon using OpenStreetMap API
+    </p>
+  </footer>
+  
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    // Initialize the map
+    var map = L.map('map').setView([28.6139, 77.2090], 13); // Set to New Delhi, India
+
+    // Add the OSM tile layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Initialize the destination marker
+    var destinationMarker = L.marker([28.6139, 77.2090], { draggable: true }).addTo(map);
+
+    // Update destination coordinates on marker drag
+    destinationMarker.on('dragend', function (event) {
+      var marker = event.target;
+      var position = marker.getLatLng();
+      console.log(position);
+    });
+
+    function getRoute() {
+      // Example: Get current location using Geolocation API
+      navigator.geolocation.getCurrentPosition((position) => {
+        const currentCoords = `${position.coords.latitude},${position.coords.longitude}`;
+
+        // Example: Get destination coordinates from the marker
+        const destinationCoords = `${destinationMarker.getLatLng().lat},${destinationMarker.getLatLng().lng}`;
+
+        // Send coordinates to the backend
+        fetch('/getRoute', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: `currentCoords=${currentCoords}&destinationCoords=${destinationCoords}`,
+        })
+        .then(response => response.text())
+        .then((link) => {
+          const routeLink = document.getElementById('routeLink');
+          const googleMapsLink = document.getElementById('googleMapsLink');
+          const getRouteButton = document.getElementById('getRouteButton');
+          
+          googleMapsLink.href = link;
+          document.getElementById('routeInfo').style.display = 'block';
+          
+          // Hide the "Get Route" button
+          getRouteButton.style.display = 'none';
+        });
+      });
+    }
+  </script>
+</body>
+</html>
