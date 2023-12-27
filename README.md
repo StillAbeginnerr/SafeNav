@@ -20,6 +20,3 @@ The project enriched our understanding of ReactJS, data analysis, and real-time 
 Future Developments
 SafeNav aims to refine its algorithm further, incorporating user feedback for continuous improvement. Exploring additional features and potential partnerships will enhance user safety, solidifying SafeNav's position as a trusted navigator in urban landscapes.
 
-Developers
-Shivam Agarwal
-Srishti Paul
